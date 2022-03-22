@@ -17,6 +17,9 @@ module.exports = {
     hardhat: {
       chainId: 31337
     },
+    localhost: {
+      from: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    },
     mumbai: {
       url: process.env.NODE_URL,
     }

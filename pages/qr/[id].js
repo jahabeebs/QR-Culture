@@ -11,7 +11,7 @@ export default function QRDigits() {
     return (
         <div className="flex flex-col items-center">
             <Link href={'/mint/' + dynamicUrl}>
-            <div>
+            <div className="text-center font-black text-2xl mb-4">
             Thanks for your purchase! Scan to mint your NFT and collect rewards!
             </div>
             </Link>
@@ -25,8 +25,8 @@ export default function QRDigits() {
                     scale: 4,
                     width: 200,
                     color: {
-                        dark: '#010599FF',
-                        light: '#FFBF60FF',
+                        dark: '#090000',
+                        light: '#d4e4f8',
                     },
                 }}
             />

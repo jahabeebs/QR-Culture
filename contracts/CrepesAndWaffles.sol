@@ -10,9 +10,17 @@ contract CrepesAndWaffles is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+    mapping(bytes32 => bool) private authorizedKeys;
+
     constructor() public ERC721("Crepes and Waffles", "CREPES") {}
 
-    function sendToCustomer(address _customer, string memory _tokenURI) public onlyOwner returns (uint256) {
+    function generatePermission(bytes32 _key) public onlyOwner {
+        authorizedKeys[_key] = true;
+    }
+
+    function sendToCustomer(address _customer, string memory _tokenURI, bytes32 _key) public onlyOwner returns (uint256) {
+        require(authorizedKeys[_key], "Key not authorized");
+        authorizedKeys[_key] = false;
         _tokenIds.increment();
         uint256 currentTokenId = _tokenIds.current();
         _safeMint(_customer, currentTokenId);

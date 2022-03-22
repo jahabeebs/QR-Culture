@@ -3,48 +3,57 @@ import {ethers} from 'ethers';
 import {useState} from 'react';
 import Web3Modal from 'web3modal'
 import CrepesAndWaffles from '/artifacts/contracts/CrepesAndWaffles.sol/CrepesAndWaffles.json'
-import {nftContractAddress} from '/config';
+import {HARDHAT_PRIVATE_KEY, nftContractAddress} from '/config';
 import Image from 'next/image';
+import {useRouter} from "next/router";
 
 export default function MintPage() {
+    const router = useRouter();
     const [address, setAddress] = useState()
-    const [nftsOwned, setNftsOwned] = useState(0);
+    const [nftsOwned, setNftsOwned] = useState("-");
     const [showMe, setShowMe] = useState(false);
     let crepesAndWafflesContract;
-    let finalSigner = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+    let finalSigner = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
     let tokensOwned;
+    const dynamicUrl = router.query.id;
 
     async function mintNFT() {
+        const key = ethers.utils.formatBytes32String(dynamicUrl.toString());
         const providerOptions = {}
         const web3Modal = new Web3Modal({disableInjectedProvider: false, cacheProvider: false, providerOptions});
         const instance = await web3Modal.connect();
-        const provider = new ethers.providers.Web3Provider(instance);
-        const signer = await provider.getSigner();
-        setAddress(await signer.getAddress());
-        console.log("current address is " + address + " chainID is " + await signer.getChainId());
-        crepesAndWafflesContract = new ethers.Contract(nftContractAddress, CrepesAndWaffles.abi, signer);
+        const customerProvider = new ethers.providers.Web3Provider(instance);
+        const customerSigner = await customerProvider.getSigner();
+        setAddress(await customerSigner.getAddress());
+        console.log("current address is " + address + " chainID is " + await customerSigner.getChainId());
         console.log(nftContractAddress + " is nftContractAddress");
-        console.log(crepesAndWafflesContract + " is crepesAndWafflesContract");
         const tokenURI = "https://gateway.ipfs.io/ipfs/QmQbE7vMQqSG1aWyvexQZSUk5ciqk5mbJWe6HpgK6FZX4w";
-        const transaction = await crepesAndWafflesContract.sendToCustomer("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", tokenURI)
-        transaction.wait();
-        console.log(transaction + "is transaction");
-        await loadNFT(provider);
+        const wallet = new ethers.Wallet(HARDHAT_PRIVATE_KEY);
+        const provider = new ethers.providers.JsonRpcProvider();
+        const signerToDeploy = await provider.getSigner(wallet.address);
+        crepesAndWafflesContract = new ethers.Contract(nftContractAddress, CrepesAndWaffles.abi, signerToDeploy);
+        try {
+            const transaction = await crepesAndWafflesContract.sendToCustomer("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", tokenURI, key);
+            transaction.wait();
+        } catch (error) {
+            console.log(error);
+        }
+        await loadNFT();
     }
 
     async function loadNFT() {
-        console.log("final signer is " + finalSigner);
-        const tokensOfFirstWallet = await listTokensOfOwner(nftContractAddress, finalSigner);
-        console.log("number of tokens you have is " + tokensOfFirstWallet.size);
-        console.log("tokensOfFirstWallet are " + tokensOfFirstWallet);
+        console.log("customer signer is " + finalSigner);
+        const tokensOfCustomerWallet = await listTokensOfOwner(nftContractAddress, finalSigner);
+        console.log("number of tokens you have is " + tokensOfCustomerWallet.size);
+        console.log("tokensOfCustomerWallet are " + tokensOfCustomerWallet);
+        console.log(listTokensOfOwner(nftContractAddress, "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"));
         console.log(listTokensOfOwner(nftContractAddress, finalSigner));
-        console.log(listTokensOfOwner(nftContractAddress, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"));
-        tokensOwned = tokensOfFirstWallet.size;
-        setNftsOwned(tokensOwned += 1);
+        tokensOwned = tokensOfCustomerWallet.size;
+        setNftsOwned(tokensOwned);
         console.log("tokensOwned includes " + tokensOwned);
     }
 
-    function loadGallery() {
+    async function loadGallery() {
         setShowMe(!showMe);
     }
 
@@ -83,8 +92,9 @@ export default function MintPage() {
     }
 
     return (
+        <body className="w-full h-full bg-gradient-to-r from-cyan-200 to-blue-200">
         <div className="flex flex-col items-center">
-            <div>
+            <div className="flex text-2xl font-bold">
                 Click to mint your NFT
             </div>
             <div
@@ -98,10 +108,10 @@ export default function MintPage() {
                  onClick={() => loadGallery()}>
                 How many NFTs do I own?
             </div>
-            <div style={{
+            <div className="text-2xl mt-2 font-black" style={{
                 display: showMe ? "block" : "none"
             }}>
-                {nftsOwned}
+                You own {nftsOwned}
             </div>
             <div className="mt-4">
 
@@ -109,5 +119,6 @@ export default function MintPage() {
                        height="250px"/>
             </div>
         </div>
+        </body>
     );
 }
