@@ -23,7 +23,6 @@ async function registerKey() {
 
 export default function Home() {
     return (
-        <body className="w-full h-full bg-gradient-to-r from-cyan-200 to-blue-200">
         <div className="flex flex-col items-center">
             <Head>
                 <title>QR Culture</title>
@@ -43,7 +42,6 @@ export default function Home() {
                 </div>
             </Link>
         </div>
-        </body>
 
     )
 }

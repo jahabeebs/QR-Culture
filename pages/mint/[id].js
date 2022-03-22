@@ -92,7 +92,6 @@ export default function MintPage() {
     }
 
     return (
-        <body className="w-full h-full bg-gradient-to-r from-cyan-200 to-blue-200">
         <div className="flex flex-col items-center">
             <div className="flex text-2xl font-bold">
                 Click to mint your NFT
@@ -119,6 +118,5 @@ export default function MintPage() {
                        height="250px"/>
             </div>
         </div>
-        </body>
     );
 }
