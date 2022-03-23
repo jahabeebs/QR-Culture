@@ -35,7 +35,9 @@ export default function MintPage() {
         try {
             const transaction = await crepesAndWafflesContract.sendToCustomer(finalSigner, tokenURI, key);
             transaction.wait();
+            alert("You've minted!");
         } catch (error) {
+            alert("You've already minted!");
             console.log(error);
         }
         await loadNFT();
@@ -93,7 +95,7 @@ export default function MintPage() {
 
     return (
         <div className="flex flex-col items-center">
-            <div className="flex text-2xl font-bold">
+            <div className="flex text-3xl font-bold">
                 Click to mint your NFT
             </div>
             <div
