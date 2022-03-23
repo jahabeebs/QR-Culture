@@ -9,23 +9,23 @@ import {useRouter} from "next/router";
 
 export default function MintPage() {
     const router = useRouter();
-    const [address, setAddress] = useState()
     const [nftsOwned, setNftsOwned] = useState("-");
     const [showMe, setShowMe] = useState(false);
     let crepesAndWafflesContract;
-    let finalSigner = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
     let tokensOwned;
+    let finalSigner;
     const dynamicUrl = router.query.id;
 
     async function mintNFT() {
         const key = ethers.utils.formatBytes32String(dynamicUrl.toString());
         const providerOptions = {}
-        const web3Modal = new Web3Modal({disableInjectedProvider: false, cacheProvider: false, providerOptions});
+        const web3Modal = new Web3Modal({disableInjectedProvider: false, cacheProvider: true, providerOptions});
         const instance = await web3Modal.connect();
         const customerProvider = new ethers.providers.Web3Provider(instance);
         const customerSigner = await customerProvider.getSigner();
-        setAddress(await customerSigner.getAddress());
-        console.log("current address is " + address + " chainID is " + await customerSigner.getChainId());
+        finalSigner = await customerSigner.getAddress();
+        console.log(finalSigner + " is final signer");
+        console.log("current address is " + finalSigner + " chainID is " + await customerSigner.getChainId());
         console.log(nftContractAddress + " is nftContractAddress");
         const tokenURI = "https://gateway.ipfs.io/ipfs/QmQbE7vMQqSG1aWyvexQZSUk5ciqk5mbJWe6HpgK6FZX4w";
         const wallet = new ethers.Wallet(HARDHAT_PRIVATE_KEY);
@@ -33,7 +33,7 @@ export default function MintPage() {
         const signerToDeploy = await provider.getSigner(wallet.address);
         crepesAndWafflesContract = new ethers.Contract(nftContractAddress, CrepesAndWaffles.abi, signerToDeploy);
         try {
-            const transaction = await crepesAndWafflesContract.sendToCustomer("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", tokenURI, key);
+            const transaction = await crepesAndWafflesContract.sendToCustomer(finalSigner, tokenURI, key);
             transaction.wait();
         } catch (error) {
             console.log(error);
